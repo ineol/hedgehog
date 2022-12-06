@@ -51,15 +51,18 @@ impl<M: Model> Hist<M> {
     pub fn push_back(&mut self, ev: Event<M>) -> usize {
         let news_pos = self.events.len();
         let old_last = {
+            // update the rear sentinel
             let last = self.events.get_mut(Self::END).unwrap();
             let old_last = last.prev;
             last.prev = news_pos;
             old_last
         };
         {
+            // update the previous last node
             let last = self.events.get_mut(old_last).unwrap();
             last.next = news_pos;
         }
+        // add the new node
         self.events.push(Node {
             ev: Some(ev),
             next: Self::END,
