@@ -1,0 +1,20 @@
+[package]
+name = "hedgehog"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "*"
+color-eyre = "*"
+
+bit-vec = "*"
+crossbeam-queue = "*"
+rand = { version = "*", features = ["small_rng"] }
+tracing = "*"
+tracing-subscriber = "*"
+
+## example: flurry
+flurry = "*"
+rpds = "*"
