@@ -80,11 +80,11 @@ where
                     }
                 });
             }
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(5));
             start.store(true, Ordering::Release);
         });
         // probably unnecessary
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(1));
     }
 
     pub fn produce_history(self) -> Hist<M> {
@@ -98,15 +98,19 @@ where
             .take(self.thread_count as usize)
             .collect();
 
+        let mut call_id = 0;
+
         for event in self.events {
             match event {
                 Event::Invoke { op, tid } => {
                     let pos = hist.push_back(crate::Event::Invoke {
                         op,
                         ret_event: INVALID,
+                        call_id,
                     });
                     debug_assert_eq!(pending[tid as usize], INVALID);
                     pending[tid as usize] = pos;
+                    call_id += 1;
                 }
                 Event::Ret { val, tid } => {
                     let pos = hist.push_back(crate::Event::Ret { val });

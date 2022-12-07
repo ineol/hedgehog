@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use hedgehog::runner;
 use rand::prelude::Distribution;
 
@@ -8,7 +10,7 @@ enum FlurryOp {
     Rm(u64),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct FlurryModel {
     inner: rpds::RedBlackTreeMap<u64, u64>,
 }
@@ -99,18 +101,29 @@ impl hedgehog::runner::System<FlurryModel> for FlurrySystem {
 }
 
 fn main() {
-    let runner: runner::Runner<FlurryModel, FlurrySystem> = hedgehog::runner::Runner::new(2, 100);
-    let hist = runner.produce_history();
+    for _ in 0..100 {
+        let runner: runner::Runner<FlurryModel, FlurrySystem> =
+            hedgehog::runner::Runner::new(5, 10_000);
 
-    println!("Size of the history = {}", hist.len());
+        let begin = Instant::now();
+        let hist = runner.produce_history();
 
-    for ev in &hist {
-        println!("{:?}", ev);
+        println!("History produced in {:?}", begin.elapsed());
+
+        // for ev in &hist {
+        //     println!("{:?}", ev);
+        // }
+
+        // println!("The history {:#?}", &hist);
+
+        let checking = Instant::now();
+
+        let mut checker = hedgehog::Checker::new(hist);
+
+        let res = checker.check_linearizability();
+
+        println!("Linearizability checked in {:?}", checking.elapsed());
+
+        println!("\n\nWas this history linearizable? {}", res);
     }
-
-    let mut checker = hedgehog::Checker::new(hist);
-
-    let res = checker.check_linearizability();
-
-    println!("\n\nWas this history linearizable? {}", res);
 }
