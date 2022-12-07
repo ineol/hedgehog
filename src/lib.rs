@@ -1,5 +1,6 @@
 use std::{collections::HashSet, hash::Hash};
 
+pub mod bitvec;
 pub mod runner;
 
 pub trait Model: Sized {
@@ -198,7 +199,7 @@ impl<'a, M: Model> IntoIterator for &'a Hist<M> {
     }
 }
 
-type Linbits = bit_vec::BitVec<u32>; // TODO: use u64
+type Linbits = crate::bitvec::BitVec; // TODO: use u64
 
 pub struct Checker<M: Model> {
     hist: Hist<M>,
@@ -215,7 +216,7 @@ where
         let len = hist.len();
         Self {
             hist,
-            lined: Linbits::from_elem(len / 2, false),
+            lined: Linbits::from_elem(false, len / 2),
             calls: Vec::new(),
             cache: HashSet::new(),
         }
@@ -249,7 +250,9 @@ where
 
         let mut s = M::initial();
 
+        let mut iteration_count: u64 = 0;
         loop {
+            iteration_count += 1;
             if matches!(self.hist.get_from_eid(eid), Event::Invoke { .. }) {
                 let next_eid = self.hist.next_eid(eid).unwrap();
 
@@ -292,7 +295,7 @@ where
                 }
             }
         }
-
+        println!("... it took {iteration_count} iterations!");
         true
     }
 }

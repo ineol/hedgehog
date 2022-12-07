@@ -103,7 +103,7 @@ impl hedgehog::runner::System<FlurryModel> for FlurrySystem {
 fn main() {
     for _ in 0..100 {
         let runner: runner::Runner<FlurryModel, FlurrySystem> =
-            hedgehog::runner::Runner::new(5, 10_000);
+            hedgehog::runner::Runner::new(5, 50_000);
 
         let begin = Instant::now();
         let hist = runner.produce_history();
