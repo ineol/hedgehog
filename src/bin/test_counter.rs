@@ -1,4 +1,5 @@
 use std::{
+    io::Write,
     sync::atomic::{AtomicU32, Ordering},
     time::Instant,
 };
@@ -83,14 +84,20 @@ impl hedgehog::runner::System<CounterModel> for CounterSystem {
 }
 
 fn main() {
-    for _ in 0..100 {
-        let runner: runner::Runner<CounterModel, CounterSystem> =
-            hedgehog::runner::Runner::new(5, 10_000);
+    let count = 100;
+    let thread_count = 5;
+    let event_count = 10_000;
+    for _ in 0..count {
+        print!(".");
+        std::io::stdout().flush().unwrap();
 
-        let begin = Instant::now();
+        let runner: runner::Runner<CounterModel, CounterSystem> =
+            hedgehog::runner::Runner::new(thread_count, event_count);
+
+        // let begin = Instant::now();
         let hist = runner.produce_history();
 
-        println!("History produced in {:?}", begin.elapsed());
+        // println!("History produced in {:?}", begin.elapsed());
 
         // for ev in &hist {
         //     println!("{:?}", ev);
@@ -98,14 +105,18 @@ fn main() {
 
         // println!("The history {:#?}", &hist);
 
-        let checking = Instant::now();
+        // let checking = Instant::now();
 
         let mut checker = hedgehog::Checker::new(hist);
 
         let res = checker.check_linearizability();
 
-        println!("Linearizability checked in {:?}", checking.elapsed());
+        if !res {
+            println!("\nFound a non-linearizable history!");
+        }
 
-        println!("\n\nWas this history linearizable? {}", res);
+        // println!("Linearizability checked in {:?}", checking.elapsed());
+
+        // println!("\n\nWas this history linearizable? {}", res);
     }
 }

@@ -295,7 +295,6 @@ where
                 }
             }
         }
-        println!("... it took {iteration_count} iterations!");
         true
     }
 }
