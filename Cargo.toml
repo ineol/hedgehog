@@ -16,6 +16,12 @@ rand = { version = "*", features = ["small_rng"] }
 tracing = "*"
 tracing-subscriber = "*"
 
+num_cpus = "*"
+memory-stats = "*"
+
 ## example: flurry
 flurry = "*"
 rpds = "*"
+
+kvs = { path = "../../Work/trybox/talent-rust" }
+tempfile = "*"
