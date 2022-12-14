@@ -12,14 +12,14 @@ use crate::Model;
 
 pub trait System<M: Model>
 where
-    Self: Sized,
+    Self: Sized + Clone,
 {
     type OpDist: Distribution<M::Op>;
 
     fn new_op_distr() -> Self::OpDist;
 
     fn initial() -> Self;
-    fn apply(&self, op: M::Op) -> M::Value;
+    fn apply(&mut self, op: M::Op) -> M::Value;
 }
 
 #[derive(Debug)]
@@ -60,6 +60,7 @@ where
 
         std::thread::scope(|s| {
             for tid in 0..self.thread_count {
+                let mut sys = self.system.clone();
                 s.spawn(move || {
                     let dist = S::new_op_distr();
                     let mut rng = rand::rngs::SmallRng::from_entropy();
@@ -75,7 +76,7 @@ where
                                 tid,
                             })
                             .unwrap();
-                        let res = self.system.apply(op);
+                        let res = sys.apply(op);
                         self.events.push(Event::Ret { val: res, tid }).unwrap();
                     }
                 });

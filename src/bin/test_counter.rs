@@ -1,6 +1,9 @@
 use std::{
     io::Write,
-    sync::atomic::{AtomicU32, Ordering},
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc,
+    },
     time::Instant,
 };
 
@@ -40,8 +43,9 @@ impl hedgehog::Model for CounterModel {
     }
 }
 
+#[derive(Clone)]
 struct CounterSystem {
-    inner: AtomicU32,
+    inner: Arc<AtomicU32>,
 }
 
 struct CounterOpDist;
@@ -67,11 +71,11 @@ impl hedgehog::runner::System<CounterModel> for CounterSystem {
 
     fn initial() -> Self {
         Self {
-            inner: AtomicU32::new(0),
+            inner: AtomicU32::new(0).into(),
         }
     }
 
-    fn apply(&self, op: CounterOp) -> Option<u32> {
+    fn apply(&mut self, op: CounterOp) -> Option<u32> {
         match op {
             CounterOp::Incr => {
                 let old = self.inner.load(Ordering::Relaxed);

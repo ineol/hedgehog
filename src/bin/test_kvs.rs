@@ -4,6 +4,8 @@ use hedgehog::runner;
 use rand::prelude::Distribution;
 
 use kvs::{KvStore, KvsEngine};
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
 
 #[derive(Debug, Clone)]
 enum KvOp {
@@ -48,7 +50,14 @@ impl hedgehog::Model for KvModel {
 
 struct KvSystem {
     inner: KvStore,
-    _dir: tempfile::TempDir,
+}
+
+impl Clone for KvSystem {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.try_clone().unwrap(),
+        }
+    }
 }
 
 struct KvOpDist;
@@ -79,13 +88,14 @@ impl hedgehog::runner::System<KvModel> for KvSystem {
 
     fn initial() -> Self {
         let dir = tempfile::TempDir::new().unwrap();
+        let path = dir.into_path();
+        info!("path is {:?}", &path);
         Self {
-            inner: KvStore::open(dir.path().to_path_buf()).unwrap(),
-            _dir: dir,
+            inner: KvStore::open(path).unwrap(),
         }
     }
 
-    fn apply(&self, op: KvOp) -> Option<String> {
+    fn apply(&mut self, op: KvOp) -> Option<String> {
         match op {
             KvOp::Get(key) => self.inner.get(key).unwrap(),
             KvOp::Set(key, val) => {
@@ -101,6 +111,12 @@ impl hedgehog::runner::System<KvModel> for KvSystem {
 }
 
 fn main() {
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::ERROR)
+        .with_writer(std::io::stderr)
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
     let cpus = 1;
     println!("Using {} threads", cpus);
 
@@ -122,7 +138,7 @@ fn main() {
 
         for _ in 0..cpus {
             let runner: runner::Runner<KvModel, KvSystem> =
-                hedgehog::runner::Runner::new(5, 10_000);
+                hedgehog::runner::Runner::new(4, 30_000);
             let begin = Instant::now();
             let hist = runner.produce_history();
 

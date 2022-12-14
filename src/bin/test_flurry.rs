@@ -44,6 +44,7 @@ impl hedgehog::Model for FlurryModel {
     }
 }
 
+#[derive(Clone)]
 struct FlurrySystem {
     inner: flurry::HashMap<u64, u64>,
 }
@@ -80,7 +81,7 @@ impl hedgehog::runner::System<FlurryModel> for FlurrySystem {
         }
     }
 
-    fn apply(&self, op: FlurryOp) -> Option<u64> {
+    fn apply(&mut self, op: FlurryOp) -> Option<u64> {
         match op {
             FlurryOp::Get(key) => {
                 let guard = self.inner.guard();
