@@ -23,5 +23,4 @@ memory-stats = "*"
 flurry = "*"
 rpds = "*"
 
-kvs = { path = "../../Work/trybox/talent-rust" }
 tempfile = "*"

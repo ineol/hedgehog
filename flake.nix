@@ -21,9 +21,7 @@
           buildInputs = [
             openssl
 
-            pkgconfig
-            exa
-            fd
+            pkg-config
 
             mold
             clang
@@ -41,15 +39,6 @@
 
           LD_LIBRARY_PATH = APPEND_LIBRARY_PATH;
           PKG_CONFIG_PATH = APPEND_LIBRARY_PATH;
-
-          shellHook = ''
-            echo Starting setting up paths...
-            alias ls=exa
-            alias find=fd
-            # export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$APPEND_LIBRARY_PATH"
-            # export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$APPEND_LIBRARY_PATH"
-            echo Done setting up paths.
-          '';
         };
       }
     );
